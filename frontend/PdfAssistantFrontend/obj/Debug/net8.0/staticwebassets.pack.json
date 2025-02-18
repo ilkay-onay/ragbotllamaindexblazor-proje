@@ -1,0 +1,61 @@
+{
+  "Files": [
+    {
+      "Id": "/var/home/hpo15/development/python/rag-llamaindex-proje/frontend/PdfAssistantFrontend/bin/Debug/net8.0/wwwroot/_framework/blazor.webassembly.js",
+      "PackagePath": "staticwebassets/_framework/blazor.webassembly.js"
+    },
+    {
+      "Id": "/var/home/hpo15/development/python/rag-llamaindex-proje/frontend/PdfAssistantFrontend/obj/Debug/net8.0/compressed/l05vybcm4r.gz",
+      "PackagePath": "staticwebassets/_framework/blazor.webassembly.js.gz"
+    },
+    {
+      "Id": "/var/home/hpo15/development/python/rag-llamaindex-proje/frontend/PdfAssistantFrontend/obj/Debug/net8.0/scopedcss/bundle/PdfAssistantFrontend.styles.css",
+      "PackagePath": "staticwebassets/PdfAssistantFrontend.styles.css"
+    },
+    {
+      "Id": "/var/home/hpo15/development/python/rag-llamaindex-proje/frontend/PdfAssistantFrontend/wwwroot/css/app.css",
+      "PackagePath": "staticwebassets/css/app.css"
+    },
+    {
+      "Id": "/var/home/hpo15/development/python/rag-llamaindex-proje/frontend/PdfAssistantFrontend/wwwroot/css/bootstrap/bootstrap.min.css",
+      "PackagePath": "staticwebassets/css/bootstrap/bootstrap.min.css"
+    },
+    {
+      "Id": "/var/home/hpo15/development/python/rag-llamaindex-proje/frontend/PdfAssistantFrontend/wwwroot/css/bootstrap/bootstrap.min.css.map",
+      "PackagePath": "staticwebassets/css/bootstrap/bootstrap.min.css.map"
+    },
+    {
+      "Id": "/var/home/hpo15/development/python/rag-llamaindex-proje/frontend/PdfAssistantFrontend/wwwroot/favicon.png",
+      "PackagePath": "staticwebassets/favicon.png"
+    },
+    {
+      "Id": "/var/home/hpo15/development/python/rag-llamaindex-proje/frontend/PdfAssistantFrontend/wwwroot/icon-192.png",
+      "PackagePath": "staticwebassets/icon-192.png"
+    },
+    {
+      "Id": "/var/home/hpo15/development/python/rag-llamaindex-proje/frontend/PdfAssistantFrontend/wwwroot/index.html",
+      "PackagePath": "staticwebassets/index.html"
+    },
+    {
+      "Id": "/var/home/hpo15/development/python/rag-llamaindex-proje/frontend/PdfAssistantFrontend/wwwroot/sample-data/weather.json",
+      "PackagePath": "staticwebassets/sample-data/weather.json"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.PdfAssistantFrontend.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.build.PdfAssistantFrontend.props",
+      "PackagePath": "build\\PdfAssistantFrontend.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.PdfAssistantFrontend.props",
+      "PackagePath": "buildMultiTargeting\\PdfAssistantFrontend.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.PdfAssistantFrontend.props",
+      "PackagePath": "buildTransitive\\PdfAssistantFrontend.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

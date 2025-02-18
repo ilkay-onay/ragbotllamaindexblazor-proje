@@ -1,0 +1,257 @@
+@page "/"
+@using System.Net.Http.Json
+
+<PageTitle>PDF Yardımcısı</PageTitle>
+
+<div class="container">
+    <h1>Konuşan PDF Asistanı</h1>
+
+    <div class="upload-section">
+        <h3>PDF Yükle</h3>
+        <InputFile OnChange="DosyaYukle" />
+        @if (!string.IsNullOrEmpty(YuklemeMesaji))
+        {
+            <p>@YuklemeMesaji</p>
+        }
+        @if (BelgeOzetleri != null && BelgeOzetleri.Any())
+        {
+            <div>
+                <strong>İşlenmiş Belgelerden Özetler:</strong>
+                <ul>
+                    @foreach (var ozet in BelgeOzetleri)
+                    {
+                        <li>@ozet</li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+
+    <div class="query-section">
+        <h3>Soru Sor</h3>
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Sorunu yaz..." @bind="Soru" />
+            <button class="btn btn-primary" @onclick="SoruSor">Sor</button>
+        </div>
+        @if (!string.IsNullOrEmpty(Cevap))
+        {
+            <div class="answer-box">
+                <strong>Cevap:</strong>
+                <p>@Cevap</p>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(IslemeMesaji))
+        {
+            <p>@IslemeMesaji</p>
+        }
+        @if (!string.IsNullOrEmpty(HataMesaji))
+        {
+            <p class="error-message">Hata: @HataMesaji</p>
+        }
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-family: sans-serif;
+    }
+
+    h1, h3 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .upload-section, .query-section {
+        margin-bottom: 30px;
+        padding: 15px;
+        border: 1px solid #eee;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+
+    .input-group {
+        display: flex;
+    }
+
+    .form-control {
+        flex-grow: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px 0 0 5px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 0 5px 5px 0;
+        cursor: pointer;
+    }
+
+    .answer-box {
+        margin-top: 15px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #fff;
+        white-space: pre-line;
+    }
+
+    .error-message {
+        color: red;
+        margin-top: 10px;
+    }
+</style>
+
+@code {
+    private string YuklemeMesaji = "";
+    private string IslemeMesaji = "";
+    private string HataMesaji = "";
+    private string Soru = "";
+    private string Cevap = "";
+    private List<string>? BelgeOzetleri;
+    private List<string>? BelgeMetinleri;
+    private IBrowserFile? pdfDosyasi;
+
+    private async Task DosyaYukle(InputFileChangeEventArgs e)
+    {
+        HataMesaji = "";
+        YuklemeMesaji = "";
+        BelgeOzetleri = null;
+        BelgeMetinleri = null;
+        pdfDosyasi = null;
+
+        pdfDosyasi = e.File;
+        if (pdfDosyasi != null)
+        {
+            try
+            {
+                using var content = new MultipartFormDataContent();
+                var fileContent = new StreamContent(pdfDosyasi.OpenReadStream(pdfDosyasi.Size));
+                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(pdfDosyasi.ContentType);
+                content.Add(fileContent, "dosya", pdfDosyasi.Name);
+
+                var httpClient = new HttpClient();
+                var response = await httpClient.PostAsync("http://localhost:5001/yukle", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<YuklemeYaniti>();
+                    if (result != null)
+                    {
+                        YuklemeMesaji = result.Mesaj ?? "PDF yuklendi ve islendi tamam.";
+                        BelgeMetinleri = result.Belgeler;
+                        BelgeOzetleri = result.Belgeler?.Select(metin => metin.Length > 100 ? metin[..100] + "..." : metin).ToList();
+                        await BelgeleriIsleSorguIcin(BelgeMetinleri);
+                    }
+                    else
+                    {
+                        YuklemeMesaji = "PDF yuklendi ama isleme yaniti beklenmedik.";
+                    }
+                }
+                else
+                {
+                    var errorResult = await response.Content.ReadFromJsonAsync<HataYaniti>();
+                    HataMesaji = errorResult?.Hata ?? $"Yukleme basarisiz: {response.StatusCode}";
+                }
+            }
+            catch (Exception ex)
+            {
+                HataMesaji = $"Yukleme hatası: {ex.Message}";
+            }
+        }
+    }
+
+    private async Task BelgeleriIsleSorguIcin(List<string>? belgeMetinleri)
+    {
+        IslemeMesaji = "";
+        HataMesaji = "";
+        if (belgeMetinleri != null && belgeMetinleri.Any())
+        {
+            try
+            {
+                var httpClient = new HttpClient();
+                var response = await httpClient.PostAsJsonAsync("http://localhost:5002/isle", new { belgeler = belgeMetinleri });
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<IslemeYaniti>();
+                    IslemeMesaji = result?.Mesaj ?? "Belgeler sorgu icin indekslendi.";
+                }
+                else
+                {
+                    var errorResult = await response.Content.ReadFromJsonAsync<HataYaniti>();
+                    HataMesaji = errorResult?.Hata ?? $"Belge isleme basarisiz: {response.StatusCode}";
+                }
+            }
+            catch (Exception ex)
+            {
+                HataMesaji = $"Belge isleme hatasi: {ex.Message}";
+            }
+        }
+        else
+        {
+            HataMesaji = "İşlenecek belge yok.";
+        }
+    }
+
+
+    private async Task SoruSor()
+    {
+        Cevap = "";
+        HataMesaji = "";
+        if (string.IsNullOrWhiteSpace(Soru))
+        {
+            HataMesaji = "Lutfen soru yaz.";
+            return;
+        }
+
+        try
+        {
+            var httpClient = new HttpClient();
+            var response = await httpClient.PostAsJsonAsync("http://localhost:5002/sor", new { soru = Soru });
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<SoruYaniti>();
+                Cevap = result?.Cevap ?? "Cevap yok.";
+            }
+            else
+            {
+                var errorResult = await response.Content.ReadFromJsonAsync<HataYaniti>();
+                HataMesaji = errorResult?.Hata ?? $"Soru sorma basarisiz: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            HataMesaji = $"Soru sorma hatasi: {ex.Message}";
+        }
+    }
+
+    public class YuklemeYaniti
+    {
+        public string? Mesaj { get; set; }
+        public List<string>? Belgeler { get; set; }
+    }
+
+    public class IslemeYaniti
+    {
+        public string? Mesaj { get; set; }
+    }
+
+    public class SoruYaniti
+    {
+        public string? Cevap { get; set; }
+    }
+
+    public class HataYaniti
+    {
+        public string? Hata { get; set; }
+    }
+}
